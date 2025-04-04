@@ -1,111 +1,114 @@
 
-$(document).ready(function() {
-    // Initialize AOS animation library
-    AOS.init({
-        duration: 1000,
-        once: true,
-        mirror: false
-    });
+// Initialize AOS animation library
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize AOS animation library
+  AOS.init({
+    duration: 1000,
+    once: true,
+    mirror: false
+  });
 
-    // Navbar shrink function
-    function navbarShrink() {
-        const navbarCollapsible = $('#mainNav');
-        if (!navbarCollapsible) {
-            return;
-        }
-        if (window.scrollY === 0) {
-            navbarCollapsible.removeClass('navbar-shrink');
-        } else {
-            navbarCollapsible.addClass('navbar-shrink');
-        }
+  // Navigation bar color change on scroll
+  window.addEventListener('scroll', function() {
+    const navbar = document.getElementById('mainNav');
+    if (window.scrollY > 100) {
+      navbar.classList.add('navbar-shrink');
+    } else {
+      navbar.classList.remove('navbar-shrink');
     }
+  });
 
-    // Shrink the navbar when page is scrolled
-    navbarShrink();
-    $(document).scroll(navbarShrink);
+  // Show/hide back to top button
+  window.addEventListener('scroll', function() {
+    const scrollButton = document.querySelector('.scroll-to-top');
+    if (window.scrollY > 300) {
+      scrollButton.classList.add('active');
+    } else {
+      scrollButton.classList.remove('active');
+    }
+  });
 
-    // Activate Bootstrap scrollspy on the main nav element
-    $('body').scrollspy({
-        target: '#mainNav',
-        offset: 74
-    });
-
-    // Smooth scroll for navigation
-    $('.js-scroll-trigger').click(function(e) {
-        if (this.hash !== "") {
-            e.preventDefault();
-            const hash = this.hash;
-            $('html, body').animate({
-                scrollTop: $(hash).offset().top
-            }, 800, function() {
-                window.location.hash = hash;
-            });
-        }
-    });
-
-    // Close responsive menu when a scroll trigger link is clicked
-    $('.js-scroll-trigger').click(function() {
-        $('.navbar-collapse').collapse('hide');
-    });
-
-    // Show/hide back to top button
-    $(window).scroll(function() {
-        if ($(this).scrollTop() > 300) {
-            $('.scroll-to-top').addClass('active');
-        } else {
-            $('.scroll-to-top').removeClass('active');
-        }
-    });
-
-    // Resume download button functionality
-    $('#resume-download').click(function(e) {
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('.js-scroll-trigger').forEach(link => {
+    link.addEventListener('click', function(e) {
+      if (this.hash !== '') {
         e.preventDefault();
-        alert("Resume not available currently. Check back later!");
-    });
-
-    // Form validation
-    $('.contact-form').submit(function(e) {
-        e.preventDefault();
-        let isValid = true;
+        const hash = this.hash;
+        const targetElement = document.querySelector(hash);
         
-        $(this).find('[required]').each(function() {
-            if ($(this).val() === '') {
-                isValid = false;
-                $(this).addClass('is-invalid');
-            } else {
-                $(this).removeClass('is-invalid');
-            }
-        });
-        
-        if (isValid) {
-            // Here you would normally send the form data to a server
-            alert('Thank you for your message! I will get back to you soon.');
-            $(this).trigger('reset');
-        } else {
-            alert('Please fill in all required fields.');
+        if (targetElement) {
+          const navHeight = document.querySelector('#mainNav').offsetHeight;
+          
+          window.scrollTo({
+            top: targetElement.offsetTop - navHeight,
+            behavior: 'smooth'
+          });
+          
+          // Close mobile menu if open
+          const navbarCollapse = document.querySelector('.navbar-collapse');
+          if (navbarCollapse.classList.contains('show')) {
+            navbarCollapse.classList.remove('show');
+          }
         }
+      }
     });
+  });
 
-    // Animate skill bars when they come into view
-    const animateSkills = function() {
-        $('.skill-progress').each(function() {
-            const position = $(this).offset().top;
-            const scrollPosition = $(window).scrollTop() + $(window).height() - 100;
-            
-            if (position < scrollPosition) {
-                $(this).find('.progress-bar').css('width', $(this).find('.progress-bar').attr('aria-valuenow') + '%');
-            }
-        });
-    };
+  // Form submission handler
+  const contactForm = document.querySelector('.contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // You would normally handle form submission with AJAX here
+      const formFields = this.querySelectorAll('input, textarea');
+      let valid = true;
+      
+      // Simple validation
+      formFields.forEach(field => {
+        if (field.hasAttribute('required') && !field.value.trim()) {
+          field.style.borderColor = '#dc3545';
+          valid = false;
+        } else {
+          field.style.borderColor = '';
+        }
+      });
+      
+      if (valid) {
+        alert('Message sent successfully! (Demo only)');
+        this.reset();
+      } else {
+        alert('Please fill all required fields.');
+      }
+    });
+  }
+
+  // Resume download handler
+  const resumeBtn = document.getElementById('resume-download');
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      alert('Resume download would start here. (Demo only)');
+    });
+  }
+  
+  // Add active class to nav items when scrolling
+  window.addEventListener('scroll', function() {
+    let fromTop = window.scrollY + document.querySelector('#mainNav').offsetHeight + 50;
     
-    // Initial check and on scroll
-    animateSkills();
-    $(window).scroll(animateSkills);
-
-    // Fix for the scrollspy issue with Bootstrap 5
-    const dataSpyList = [].slice.call(document.querySelectorAll('[data-bs-spy="scroll"]'))
-    dataSpyList.forEach(function (dataSpyEl) {
-        bootstrap.ScrollSpy.getInstance(dataSpyEl)
-            .refresh()
+    document.querySelectorAll('section[id]').forEach(section => {
+      if (
+        section.offsetTop <= fromTop &&
+        section.offsetTop + section.offsetHeight > fromTop
+      ) {
+        const id = section.getAttribute('id');
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
     });
+  });
 });
